@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,7 +8,28 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 
 void main() {
-  runApp(const MainApp());
+  // Останній рубіж: якщо щось падає повз усі локальні try/catch, застосунок
+  // не має вилітати цілком - логуємо й лишаємось живими.
+  runZonedGuarded(() {
+    FlutterError.onError = (details) {
+      FlutterError.presentError(details);
+      debugPrint('FlutterError: ${details.exceptionAsString()}');
+    };
+    ErrorWidget.builder = (details) => const Material(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'Щось пішло не так. Спробуй перезапустити застосунок.',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        );
+    runApp(const MainApp());
+  }, (error, stack) {
+    debugPrint('Unhandled error: $error\n$stack');
+  });
 }
 
 class MainApp extends StatelessWidget {

@@ -51,7 +51,7 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
         'lobbyId': _lobby.id,
       }));
       channel.stream.listen(
-        (raw) => _handleWsMessage(raw as String),
+        (raw) => _handleWsMessage(raw),
         onError: (_) => _startPollingFallback(),
         onDone: () => _startPollingFallback(),
         cancelOnError: true,
@@ -61,10 +61,22 @@ class _GameSessionScreenState extends State<GameSessionScreen> {
     }
   }
 
-  void _handleWsMessage(String raw) {
-    final data = jsonDecode(raw) as Map<String, dynamic>;
-    if (data['type'] == 'state' && mounted) {
-      setState(() => _lobby = Lobby.fromJson(data['lobby'] as Map<String, dynamic>));
+  // Будь-яка помилка тут (не рядок, не JSON, не той формат) просто
+  // ігнорує конкретне повідомлення замість падіння всього стріму -
+  // наступне коректне повідомлення (або polling-фолбек) все одно дійде.
+  void _handleWsMessage(dynamic raw) {
+    try {
+      if (raw is! String) return;
+      final data = jsonDecode(raw);
+      if (data is! Map<String, dynamic>) return;
+      if (data['type'] == 'state' && mounted) {
+        final lobbyJson = data['lobby'];
+        if (lobbyJson is Map<String, dynamic>) {
+          setState(() => _lobby = Lobby.fromJson(lobbyJson));
+        }
+      }
+    } catch (_) {
+      // ігноруємо некоректне повідомлення
     }
   }
 
