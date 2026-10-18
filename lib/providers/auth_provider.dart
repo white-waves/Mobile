@@ -16,6 +16,8 @@ class AuthProvider extends ChangeNotifier {
 
   ApiClient get api => _api;
 
+  bool get isAuthenticated => status == AuthStatus.authenticated;
+
   Future<void> loadSession() async {
     final session = await _storage.load();
     if (session == null) {

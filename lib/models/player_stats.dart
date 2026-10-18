@@ -30,3 +30,33 @@ class PlayerStats {
     );
   }
 }
+
+class LeaderboardEntry {
+  final int rank;
+  final String nickname;
+  final String country;
+  final int battles;
+  final int wins;
+  final int points;
+
+  LeaderboardEntry({
+    required this.rank,
+    required this.nickname,
+    required this.country,
+    required this.battles,
+    required this.wins,
+    required this.points,
+  });
+
+  factory LeaderboardEntry.fromJson(Map<String, dynamic> json) {
+    final stats = json['stats'] as Map<String, dynamic>;
+    return LeaderboardEntry(
+      rank: (json['rank'] as num).toInt(),
+      nickname: json['nickname'] as String,
+      country: json['country'] as String? ?? '',
+      battles: (stats['battles'] as num).toInt(),
+      wins: (stats['wins'] as num).toInt(),
+      points: (stats['points'] as num).toInt(),
+    );
+  }
+}
